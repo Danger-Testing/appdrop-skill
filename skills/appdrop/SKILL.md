@@ -18,7 +18,7 @@ publishes made with a signed-in token attach to their account immediately;
 publishes made with an anonymous grant return a **claim link** the user must
 open within 24 hours to keep the app.
 
-To install or update this skill: `npx skills add marcgmbh/appdrop-skill --skill appdrop -g`
+To install or update this skill: `npx skills add Danger-Testing/appdrop-skill --skill appdrop -g`
 Without npm: `curl -fsSL https://www.appdrop.com/install.sh | bash`
 
 ## Current docs

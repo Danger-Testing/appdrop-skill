@@ -5,7 +5,7 @@
 ## Install
 
 ```bash
-npx skills add marcgmbh/appdrop-skill --skill appdrop -g
+npx skills add Danger-Testing/appdrop-skill --skill appdrop -g
 ```
 
 or, without npm:
