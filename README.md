@@ -5,13 +5,13 @@
 ## Install
 
 ```bash
-npx skills add Danger-Testing/appdrop-skill --skill appdrop -g
+curl -fsSL https://www.appdrop.com/install.sh | bash
 ```
 
-or, without npm:
+or, with the skills CLI:
 
 ```bash
-curl -fsSL https://www.appdrop.com/install.sh | bash
+npx skills add Danger-Testing/appdrop-skill --skill appdrop -g
 ```
 
 Then ask your agent to "publish this to Appdrop".

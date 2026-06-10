@@ -11,15 +11,15 @@ description: >
 
 # Appdrop
 
-**Skill version: 0.1.0**
+**Skill version: 0.2.0**
 
 Appdrop publishes web apps and games to live URLs. Apps belong to the user:
 publishes made with a signed-in token attach to their account immediately;
 publishes made with an anonymous grant return a **claim link** the user must
 open within 24 hours to keep the app.
 
-To install or update this skill: `npx skills add Danger-Testing/appdrop-skill --skill appdrop -g`
-Without npm: `curl -fsSL https://www.appdrop.com/install.sh | bash`
+To install or update this skill: `curl -fsSL https://www.appdrop.com/install.sh | bash`
+With the skills CLI: `npx skills add Danger-Testing/appdrop-skill --skill appdrop -g`
 
 ## Current docs
 
@@ -152,66 +152,12 @@ Smoke test: request the printed `hostedUrl` and one asset referenced by its
 index.html, expecting 200s. A 404 on assets usually means a wrong base path —
 fix the base option, rebuild, republish.
 
-## Publish: fullstack Next.js (Cloudflare Worker via OpenNext)
+## Publish: fullstack Next.js
 
-- Preflight: `npx wrangler whoami`. If not logged in, stop and ask the user to
-  run `npx wrangler login` (their own Cloudflare account). The creator may use
-  their own Supabase for private app data, but Appdrop profile/results data
-  must go through the Appdrop SDK.
-- Do not set `output: "export"` for this path.
-- Scaffold OpenNext if missing (pin majors): dev deps
-  `@opennextjs/cloudflare@^1` and `wrangler@^4`; `wrangler.jsonc` with
-  `"main": ".open-next/worker.js"`, `"compatibility_flags": ["nodejs_compat"]`,
-  `"assets": { "directory": ".open-next/assets", "binding": "ASSETS" }`; and
-  `open-next.config.ts` exporting `defineCloudflareConfig()`.
-- Runtime env lives on Cloudflare: sensitive values as Worker secrets, never
-  wrangler vars and never `NEXT_PUBLIC_*`. Supabase secret/service_role keys
-  belong only in server code, stored as Worker secrets. Deploy with e.g.
-  `npx opennextjs-cloudflare@^1 deploy -- --keep-vars --secrets-file .env.production`
-  (never commit the secrets file; `--keep-vars` preserves dashboard-set vars).
-- Verify before registering: `npx wrangler secret list --name <worker> --json`
-  against the env names the code reads; smoke test the Worker URL and every
-  backend route (HTML where JSON is expected = stop and fix first); confirm
-  the SDK script tag if the app uses it.
-- Register the Worker with Appdrop:
-
-```bash
-curl -s -X POST "$BASE/api/publish/hosted-app/register" \
-  -H "authorization: Bearer $(cat .appdrop/token)" -H "content-type: application/json" \
-  -d @.appdrop/register.json -o .appdrop/register-result.json
-```
-
-`register.json` payload:
-
-```json
-{
-  "slug": "<url-safe-slug>",
-  "appName": "<app name>",
-  "hostedUrl": "https://<worker-url>",
-  "deployment": {
-    "provider": "cloudflare_workers",
-    "runtime": "nextjs",
-    "type": "fullstack_nextjs",
-    "url": "https://<worker-url>",
-    "workerName": "<worker-name>"
-  },
-  "files": [],
-  "manifest": {
-    "name": "<app name>",
-    "slug": "<url-safe-slug>",
-    "entry": "worker",
-    "runtime": "nextjs",
-    "spaMode": false,
-    "permissions": [],
-    "outputs": []
-  },
-  "storageProvider": "cloudflare_worker",
-  "storagePrefix": "<worker-name>",
-  "uploadedFrom": "agent-next-worker"
-}
-```
-
-Manifest permissions/outputs follow the same rules as `appdrop.json` above.
+Fullstack apps deploy to the creator's own Cloudflare account as a Worker
+(via OpenNext), then register the Worker URL with Appdrop. Read
+`fullstack.md` next to this file — or fetch `$BASE/skill/fullstack.md` —
+and follow it. Do not improvise this path from memory.
 
 ## Errors
 

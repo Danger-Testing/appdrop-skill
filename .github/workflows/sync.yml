@@ -1,0 +1,25 @@
+name: Sync skill from appdrop.com
+on:
+  schedule:
+    - cron: "23 4 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch canonical skill files
+        run: |
+          for f in SKILL.md fullstack.md; do
+            curl -fsSL "https://www.appdrop.com/skill/$f" -o "skills/appdrop/$f"
+          done
+      - name: Commit if changed
+        run: |
+          if ! git diff --quiet; then
+            git config user.name "appdrop-sync"
+            git config user.email "noreply@appdrop.com"
+            git commit -am "Sync skill from appdrop.com"
+            git push
+          fi
