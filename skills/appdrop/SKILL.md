@@ -145,6 +145,7 @@ curl -fsSL "$BASE/appdrop-publish-client.mjs" -o .appdrop/publish-client.mjs
 node .appdrop/publish-client.mjs --slug <slug> --name "<app name>" --dir dist --base-url "$BASE" --token-file .appdrop/token
 ```
 
+<!-- Limits mirror the MAX_* constants in app/api/publish/site-upload/start/route.ts -->
 Limits: 600 files, 50 MB per file, 200 MB total — prune sourcemaps and
 oversized media. Republishing only transfers changed files, so iterate freely.
 

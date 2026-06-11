@@ -2,10 +2,8 @@
 
 Part of the `appdrop` skill — read SKILL.md first for token setup, the
 static/fullstack decision, prep, and reporting. `$BASE` is the Appdrop base
-URL from SKILL.md.
-
-Fullstack apps deploy to the **creator's own Cloudflare account** as a Worker,
-then register the Worker URL with Appdrop.
+URL from SKILL.md. The Worker runs on the creator's own Cloudflare account;
+Appdrop only registers its URL.
 
 ## Preflight
 
