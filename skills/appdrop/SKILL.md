@@ -11,12 +11,13 @@ description: >
 
 # Appdrop
 
-**Skill version: 0.2.0**
+**Skill version: 0.2.1**
 
 Appdrop publishes web apps and games to live URLs. Apps belong to the user:
-publishes made with a signed-in token attach to their account immediately;
-publishes made with an anonymous grant return a **claim link** the user must
-open within 24 hours to keep the app.
+publishes made with a user token (an agent-prompt grant or the device
+sign-in flow) attach to their account immediately. Only anonymous publishes
+(a shared environment token) return a **claim link** the user must open
+within 24 hours to keep the app.
 
 To install or update this skill: `curl -fsSL https://www.appdrop.com/install.sh | bash`
 With the skills CLI: `npx skills add Danger-Testing/appdrop-skill --skill appdrop -g`
@@ -77,9 +78,9 @@ curl -s -X POST "$BASE/api/publish/device/poll" -H "content-type: application/js
 node -e "const d=require('./.appdrop/exchange.json')?.data?.device;if(d?.status==='authorization_pending'){console.log('pending');process.exit(0)};const t=d?.publishToken?.token;if(!t){console.error('failed:',JSON.stringify(d||require('./.appdrop/exchange.json')?.error));process.exit(1)};require('fs').writeFileSync('.appdrop/token',t,{mode:0o600});console.log('token saved')"
 ```
 
-Tokens from this flow are owned by the signed-in user, so publishes attach to
-their account directly — no claim link needed. Grant-based tokens from a pasted
-agent prompt are anonymous and return a claim link instead.
+Tokens from this flow — like grant-based tokens from a pasted agent prompt —
+are owned by the signed-in user, so publishes attach to their account
+directly and no claim link is returned.
 
 ## Decide: static vs fullstack
 
@@ -89,8 +90,9 @@ server, or frontend fetches to its own root-relative endpoints like
 `/api/game/start`. Otherwise publish as **static**. Never static-upload a
 fullstack app.
 
-If the repository contains multiple apps (monorepo) or appears to be the
-Appdrop platform itself, stop and ask the user which app to publish.
+If the repository contains multiple apps (monorepo), appears to be the
+Appdrop platform itself, or has no obvious web app to publish, stop and ask
+the user what to publish.
 
 ## Prepare
 
@@ -167,8 +169,9 @@ and follow it. Do not improvise this path from memory.
 - 409 `device_authorization_consumed`, or device status `expired`/`denied` →
   the code is dead; start a new device authorization or ask for a fresh prompt.
 - 403 `slug_owned_by_another_account` → pick another slug and retry.
-- Republishing the same slug from the same account updates the app in place
-  and returns a fresh claim link (use this if a claim link expires unclaimed).
+- Republishing the same slug from the same account updates the app in place.
+  An anonymous republish returns a fresh claim link — use this if a claim
+  link expires unclaimed.
 
 ## What to tell the user
 
