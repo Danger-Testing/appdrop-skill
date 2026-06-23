@@ -86,6 +86,7 @@ curl -s -X POST "$BASE/api/publish/hosted-app/register" \
     "name": "<app name>",
     "slug": "<url-safe-slug>",
     "entry": "worker",
+    "frame": { "mode": "responsive" },
     "runtime": "nextjs",
     "spaMode": false,
     "permissions": [],

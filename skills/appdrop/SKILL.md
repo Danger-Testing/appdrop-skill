@@ -118,10 +118,14 @@ the user what to publish.
   "name": "<app name>",
   "slug": "<url-safe-slug>",
   "entry": "index.html",
+  "frame": { "mode": "responsive" },
   "spaMode": true,
   "permissions": ["profile:basic"]
 }
 ```
+
+Use `"frame": { "mode": "phone-portrait", "width": 414, "height": 932 }`
+for phone-native apps that should receive a portrait iframe viewport on Appdrop.
 
 If the app saves results, also add `"outputs:create"` to permissions and an
 `outputs` array of `{ "type", "displayName", "schemaVersion": 1 }` entries.
@@ -134,8 +138,9 @@ If the app saves results, also add `"outputs:create"` to permissions and an
 - `getUser()` and `saveOutput()` REJECT outside the Appdrop iframe, so gate on
   `window.appdrop?.isEmbedded?.()` and degrade gracefully.
 - Save the main result with `await window.appdrop.saveOutput({ output_type,
-  title, summary, source_url, visibility: "private", data })`. The SDK source
-  documents the full API.
+  title, summary, preview_image_url, source_url, visibility: "private", data })`.
+  Use `preview_image_url` for a share-card/thumbnail image of the actual result.
+  The SDK source documents the full API.
 
 ## Publish: static
 
