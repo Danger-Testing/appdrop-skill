@@ -117,6 +117,7 @@ the user what to publish.
 {
   "name": "<app name>",
   "slug": "<url-safe-slug>",
+  "description": "<one-sentence app description>",
   "entry": "index.html",
   "frame": { "mode": "responsive" },
   "spaMode": true,
@@ -124,8 +125,15 @@ the user what to publish.
 }
 ```
 
-Use `"frame": { "mode": "phone-portrait", "width": 414, "height": 932 }`
-for phone-native apps that should receive a portrait iframe viewport on Appdrop.
+Use `"frame": { "mode": "responsive" }` when the app uses the iframe width.
+Use `"frame": { "mode": "contained", "width": 414, "height": 932 }` when the
+useful app surface is a fixed portrait/canvas shape and Appdrop should not treat
+the surrounding space as app content.
+Use `"frame": { "mode": "mobile", "width": 414, "height": 932 }` for
+phone-first apps that should be presented as a phone-sized Appdrop surface. If
+the app renders its phone UI inset inside a larger iframe, add
+`"crop": { "top": 0, "right": 0, "bottom": 0, "left": 0 }` so Appdrop displays
+only the actual app surface.
 
 If the app saves results, also add `"outputs:create"` to permissions and an
 `outputs` array of `{ "type", "displayName", "schemaVersion": 1 }` entries.
@@ -140,6 +148,9 @@ If the app saves results, also add `"outputs:create"` to permissions and an
 - Save the main result with `await window.appdrop.saveOutput({ output_type,
   title, summary, preview_image_url, source_url, visibility: "private", data })`.
   Use `preview_image_url` for a share-card/thumbnail image of the actual result.
+  Use `source_url` for a reloadable result URL; Appdrop uses it to reopen the
+  saved output inside the app frame from inventory and public output pages.
+  Put the structured result state in `data` so Appdrop can display and index it.
   The SDK source documents the full API.
 
 ## Publish: static

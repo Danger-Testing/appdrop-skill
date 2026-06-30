@@ -85,6 +85,7 @@ curl -s -X POST "$BASE/api/publish/hosted-app/register" \
   "manifest": {
     "name": "<app name>",
     "slug": "<url-safe-slug>",
+    "description": "<one-sentence app description>",
     "entry": "worker",
     "frame": { "mode": "responsive" },
     "runtime": "nextjs",
@@ -99,6 +100,11 @@ curl -s -X POST "$BASE/api/publish/hosted-app/register" \
 ```
 
 Manifest permissions/outputs follow the same rules as `appdrop.json` in
-SKILL.md. The response `data.publish` contains the values to report
-(claimUrl when anonymous, appdropUrl, hostedUrl, slug) — report them per
+SKILL.md. Use `"frame": { "mode": "contained", "width": 414, "height": 932 }`
+when the useful app surface is a fixed portrait/canvas shape rather than a
+responsive page, or `"frame": { "mode": "mobile", "width": 414, "height": 932 }`
+for phone-first apps that should appear as a phone-sized Appdrop surface. If the
+phone UI is inset inside a larger iframe, add a `crop` object to display only
+the actual app surface. The response `data.publish` contains the values to
+report (claimUrl when anonymous, appdropUrl, hostedUrl, slug) — report them per
 SKILL.md.
