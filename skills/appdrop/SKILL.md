@@ -13,11 +13,12 @@ description: >
 
 **Skill version: 0.2.1**
 
-Appdrop publishes web apps and games to live URLs. Apps belong to the user:
-publishes made with a user token (an agent-prompt grant or the device
-sign-in flow) attach to their account immediately. Only anonymous publishes
-(a shared environment token) return a **claim link** the user must open
-within 24 hours to keep the app.
+Appdrop publishes web apps and games to live URLs. The device sign-in flow
+attaches publishes to the signed-in user's account immediately. The grant
+from the agent prompt at `/create?mode=agent` is intentionally claimable: the
+agent returns a **claim link** that the user opens within 24 hours to attach
+the app to their account. Anonymous publishes made with a shared environment
+token also return a claim link.
 
 To install or update this skill: `curl -fsSL https://www.appdrop.com/install.sh | bash`
 With the skills CLI: `npx skills add Danger-Testing/appdrop-skill --skill appdrop -g`
@@ -78,9 +79,10 @@ curl -s -X POST "$BASE/api/publish/device/poll" -H "content-type: application/js
 node -e "const d=require('./.appdrop/exchange.json')?.data?.device;if(d?.status==='authorization_pending'){console.log('pending');process.exit(0)};const t=d?.publishToken?.token;if(!t){console.error('failed:',JSON.stringify(d||require('./.appdrop/exchange.json')?.error));process.exit(1)};require('fs').writeFileSync('.appdrop/token',t,{mode:0o600});console.log('token saved')"
 ```
 
-Tokens from this flow — like grant-based tokens from a pasted agent prompt —
-are owned by the signed-in user, so publishes attach to their account
-directly and no claim link is returned.
+Tokens from this device flow are owned by the signed-in user, so publishes
+attach to their account directly and no claim link is returned. A grant from
+the agent prompt is different: it is claimable and the publish result should
+include a claim URL for the user.
 
 ## Decide: static vs fullstack
 
