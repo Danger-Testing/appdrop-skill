@@ -128,10 +128,10 @@ the user what to publish.
 ```
 
 Use `"frame": { "mode": "responsive" }` when the app uses the iframe width.
-Use `"frame": { "mode": "contained", "width": 440, "height": 932 }` when the
+Use `"frame": { "mode": "contained", "width": 460, "height": 932 }` when the
 useful app surface is a fixed portrait/canvas shape and Appdrop should not treat
 the surrounding space as app content.
-Use `"frame": { "mode": "mobile", "width": 440, "height": 932 }` for
+Use `"frame": { "mode": "mobile", "width": 460, "height": 932 }` for
 phone-first apps that should be presented as a phone-sized Appdrop surface.
 The app fills that surface edge to edge, so render the phone UI full-bleed —
 no letterboxing or device mockup of your own.

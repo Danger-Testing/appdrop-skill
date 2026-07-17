@@ -100,9 +100,9 @@ curl -s -X POST "$BASE/api/publish/hosted-app/register" \
 ```
 
 Manifest permissions/outputs follow the same rules as `appdrop.json` in
-SKILL.md. Use `"frame": { "mode": "contained", "width": 440, "height": 932 }`
+SKILL.md. Use `"frame": { "mode": "contained", "width": 460, "height": 932 }`
 when the useful app surface is a fixed portrait/canvas shape rather than a
-responsive page, or `"frame": { "mode": "mobile", "width": 440, "height": 932 }`
+responsive page, or `"frame": { "mode": "mobile", "width": 460, "height": 932 }`
 for phone-first apps that should appear as a phone-sized Appdrop surface. The
 app fills that surface edge to edge, so render the phone UI full-bleed.
 The response `data.publish` contains the values to
