@@ -12,6 +12,9 @@ Appdrop only registers its URL.
 - The creator may use their own Supabase for private app data, but Appdrop
   profile/results data must go through the Appdrop SDK, never directly through
   the creator's Supabase.
+- Generated previews and other output media should use
+  `window.appdrop.uploadOutputAsset(...)`; the app does not need a separate
+  media bucket just to make outputs persistent.
 - Do not set `output: "export"` in next.config for this path.
 
 ## Scaffold OpenNext (if missing — pin majors)

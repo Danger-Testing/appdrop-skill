@@ -11,7 +11,7 @@ description: >
 
 # Appdrop
 
-**Skill version: 0.2.1**
+**Skill version: 0.4.0**
 
 Appdrop publishes web apps and games to live URLs. The device sign-in flow
 attaches publishes to the signed-in user's account immediately. The grant
@@ -22,6 +22,9 @@ token also return a claim link.
 
 To install or update this skill: `curl -fsSL https://www.appdrop.com/install.sh | bash`
 With the skills CLI: `npx skills add Danger-Testing/appdrop-skill --skill appdrop -g`
+
+For a model-agnostic copy/paste integration prompt that can be given to Claude
+or another coding assistant, use [`appdrop-connect-prompt.md`](./appdrop-connect-prompt.md).
 
 ## Current docs
 
@@ -136,8 +139,29 @@ phone-first apps that should be presented as a phone-sized Appdrop surface.
 The app fills that surface edge to edge, so render the phone UI full-bleed —
 no letterboxing or device mockup of your own.
 
-If the app saves results, also add `"outputs:create"` to permissions and an
-`outputs` array of `{ "type", "displayName", "schemaVersion": 1 }` entries.
+If the app saves results, add an `outputs` array. The smallest declaration is
+`{ "type": "result", "schema": { "type": "object" } }`; Appdrop infers the
+primitive family and adds `outputs:create` automatically. Add `kind`, `roles`,
+or `renderer` only when the defaults are not right. If the app reopens saved
+results from inventory, also add `"outputs:read"`.
+
+Example:
+
+```json
+{
+  "permissions": ["outputs:read"],
+  "outputs": [
+    {
+      "type": "generated-cover",
+      "schema": { "type": "object", "properties": { "image_url": { "type": "string" } } }
+    }
+  ]
+}
+```
+
+Use the reusable primitive families `link`, `text`, `image`, `video`, `audio`,
+`file`, `collection`, `profile`, `action`, and `custom`. Semantic role defaults
+include `title`, `summary`, `primary_image`, `items`, and `open`.
 
 ## Appdrop SDK (only if the app reads the user or saves results)
 
@@ -146,12 +170,70 @@ If the app saves results, also add `"outputs:create"` to permissions and an
   React component.
 - `getUser()` and `saveOutput()` REJECT outside the Appdrop iframe, so gate on
   `window.appdrop?.isEmbedded?.()` and degrade gracefully.
+- If the app renders its own internal iframe, also require Appdrop's frame
+  marker (`window.name.indexOf("appdrop-world:") === 0`) so a standalone editor
+  iframe is not mistaken for an Appdrop embed.
+- Prefer making the actual app document the direct Appdrop child. The SDK sends
+  requests to the immediate parent frame, so a wrapper page that renders the
+  real editor inside a second iframe will not reach Appdrop's bridge. If a
+  framework route is only a wrapper, redirect or rewrite it to the app document
+  while preserving `appdrop_output_id` and other query parameters. Only keep a
+  nested iframe when it implements an explicit `postMessage` proxy.
+- For generated images, use the shared Appdrop asset service instead of
+  connecting the app directly to Supabase or another platform database:
+
+```js
+const preview = await window.appdrop.uploadOutputAsset({
+  data_url: imageDataUrl,
+  content_type: "image/png",
+  purpose: "preview"
+});
+```
+
+  The returned `preview.url` is stable and can be passed to `saveOutput` as
+  `preview_image_url`. The platform owns the storage bucket and associates the
+  asset with the saved output; apps never receive storage credentials. Asset
+  uploads are only available inside the Appdrop iframe and should be skipped
+  when the app is running standalone.
+- For compatibility with older Appdrop host bridges that expose `saveOutput`
+  before `uploadOutputAsset`, do not fail the save just because the helper is
+  missing. Keep the inline preview temporarily under a conventional
+  `data.image_data_url` field and call `saveOutput`; the platform promotes it
+  to the same shared output-asset service, replaces it with stable URL/ID
+  fields, and removes the base64 from the saved output. Prefer
+  `uploadOutputAsset` whenever it is available.
 - Save the main result with `await window.appdrop.saveOutput({ output_type,
-  title, summary, preview_image_url, source_url, visibility: "private", data })`.
+  title, summary, preview_image_url, preview_asset_id, source_url,
+  visibility: "private", data })`.
   Use `preview_image_url` for a share-card/thumbnail image of the actual result.
   Use `source_url` for a reloadable result URL; Appdrop uses it to reopen the
   saved output inside the app frame from inventory and public output pages.
-  Put the structured result state in `data` so Appdrop can display and index it.
+  When an asset upload was used, pass its `id` as `preview_asset_id`. Put the
+  structured result state in `data`, including stable asset URLs or IDs rather
+  than large base64 image strings. This workflow is app-agnostic: every app
+  can register its own output type/schema while using the same asset service.
+- The blue Appdrop **"Ready to share"** card, save notice, and chat composer
+  are host UI. Apps must not recreate that UI. A successful `saveOutput()`
+  saves the result to the user's private **Creations** and opens the host's
+  ready-to-share flow for any registered output type, including images, text,
+  links, audio, video, and structured JSON.
+- The result stays private until the user explicitly taps **Send** in that
+  host card. Do not silently change visibility to `public` or call a separate
+  chat API from the app. Appdrop promotes the output and places it in chat
+  after the user confirms Send.
+- Keep app-specific output types, but classify them with reusable primitives
+  when the manifest supports it: `link`, `text`, `image`, `video`, `audio`,
+  `file`, `collection`, `profile`, `action`, or `custom`. Optional semantic
+  roles such as `primary_image`, `title`, `summary`, `items`, and `open` let
+  templates bind automatically without knowing the app. Declare these hints
+  with an output's `kind`/`roles` fields or inside `renderer`; the complete
+  app-specific state still belongs in `data`. This metadata does not require
+  an app-specific database table or migration.
+- For an app that can reopen its saved result, call
+  `await window.appdrop.getOutput({ id })`. Inventory links include the
+  `appdrop_output_id` query parameter automatically, so the SDK can also infer
+  the id when called without arguments. Gate this behind embedded detection and
+  provide a standalone fallback.
   The SDK source documents the full API.
 
 ## Publish: static
