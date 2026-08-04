@@ -163,7 +163,7 @@ Use the reusable primitive families `link`, `text`, `image`, `video`, `audio`,
 `file`, `collection`, `profile`, `action`, and `custom`. Semantic role defaults
 include `title`, `summary`, `primary_image`, `items`, and `open`.
 
-## Appdrop SDK (only if the app reads the user or saves results)
+## Appdrop SDK (user data, saved results, or prompt-free snapshots)
 
 - Load `$BASE/appdrop-sdk.js` at the document level (`next/script` for
   Next.js, a script tag in index.html for Vite/static), never from inside a
@@ -179,6 +179,43 @@ include `title`, `summary`, `primary_image`, `items`, and `open`.
   framework route is only a wrapper, redirect or rewrite it to the app document
   while preserving `appdrop_output_id` and other query parameters. Only keep a
   nested iframe when it implements an explicit `postMessage` proxy.
+- To let Appdrop's universal **Capture** action snapshot the app without a
+  browser screen-sharing prompt, register an app-owned snapshot provider after
+  the app's render surface is available. The callback receives Appdrop's output
+  limits and returns a PNG, JPEG, or WebP data URL. Return the unregister
+  function from a React effect so stale render state is not retained:
+
+```js
+useEffect(() => {
+  if (!window.appdrop?.isEmbedded?.()) return;
+
+  return window.appdrop.registerSnapshotProvider(async ({
+    maxWidth,
+    maxHeight,
+    preferredMimeTypes,
+  }) => {
+    const canvas = await renderCurrentAppToCanvas({
+      maxWidth,
+      maxHeight,
+      preferredMimeTypes,
+    });
+
+    return {
+      dataUrl: canvas.toDataURL("image/webp", 0.82),
+      width: canvas.width,
+      height: canvas.height,
+    };
+  });
+}, [/* state read by renderCurrentAppToCanvas */]);
+```
+
+  `renderCurrentAppToCanvas` is app-owned; use the app's existing canvas/export
+  path or a DOM-to-image renderer appropriate to its framework. Appdrop
+  independently checks the data URL, encoded size, and decoded dimensions.
+  Cross-origin images and nested YouTube/Instagram/etc. iframe pixels cannot be
+  read by a DOM renderer: proxy permitted assets through the app's own origin
+  or render intentional placeholders. If no provider is registered, Appdrop
+  falls back to the browser's permission-based current-tab capture.
 - For generated images, use the shared Appdrop asset service instead of
   connecting the app directly to Supabase or another platform database:
 
@@ -212,7 +249,7 @@ const preview = await window.appdrop.uploadOutputAsset({
   structured result state in `data`, including stable asset URLs or IDs rather
   than large base64 image strings. This workflow is app-agnostic: every app
   can register its own output type/schema while using the same asset service.
-- The blue Appdrop **"Ready to share"** card, save notice, and chat composer
+- The neutral Appdrop **"Ready to share"** card, save notice, and chat composer
   are host UI. Apps must not recreate that UI. A successful `saveOutput()`
   saves the result to the user's private **Creations** and opens the host's
   ready-to-share flow for any registered output type, including images, text,
