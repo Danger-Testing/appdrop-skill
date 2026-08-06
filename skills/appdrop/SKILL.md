@@ -1,19 +1,19 @@
 ---
 name: appdrop
 description: >
-  Appdrop hosts web apps and games published by agents and gives users a home
+  appdrop hosts web apps and games published by agents and gives users a home
   for what they make. Publish a static build or a fullstack Next.js app to a
-  live URL, attached to the user's Appdrop account directly or via a 24-hour
-  claim link. Use when asked to "publish this to Appdrop", "publish this app",
+  live URL, attached to the user's appdrop account directly or via a 24-hour
+  claim link. Use when asked to "publish this to appdrop", "publish this app",
   "host this", "deploy this", "put this game online", "share this app",
   "give me a link to this project", or "claim my app".
 ---
 
-# Appdrop
+# appdrop
 
 **Skill version: 0.4.0**
 
-Appdrop publishes web apps and games to live URLs. The device sign-in flow
+appdrop publishes web apps and games to live URLs. The device sign-in flow
 attaches publishes to the signed-in user's account immediately. The grant
 from the agent prompt at `/create?mode=agent` is intentionally claimable: the
 agent returns a **claim link** that the user opens within 24 hours to attach
@@ -44,8 +44,8 @@ live API behavior disagree, trust the live API.
      (the prompt itself contains the exchange command)
   4. The device sign-in flow below
 
-There is NO Appdrop npm package — never run `npx appdrop` or `npx appstar`;
-those names are not owned by Appdrop.
+There is NO appdrop npm package — never run `npx appdrop` or `npx appstar`;
+those names are not owned by appdrop.
 
 ## Token hygiene
 
@@ -73,7 +73,7 @@ curl -s -X POST "$BASE/api/publish/device/start" -H "content-type: application/j
 node -e "const d=require('./.appdrop/device.json').data.device;console.log(d.verificationUriComplete,'(code',d.userCode+', expires',d.expiresAt+')')"
 ```
 
-2. Tell the user: "Open this link, sign in to Appdrop, and approve publishing."
+2. Tell the user: "Open this link, sign in to appdrop, and approve publishing."
 3. Poll every 3 seconds (up to 10 minutes) until approved, then capture the token:
 
 ```bash
@@ -96,7 +96,7 @@ server, or frontend fetches to its own root-relative endpoints like
 fullstack app.
 
 If the repository contains multiple apps (monorepo), appears to be the
-Appdrop platform itself, or has no obvious web app to publish, stop and ask
+appdrop platform itself, or has no obvious web app to publish, stop and ask
 the user what to publish.
 
 ## Prepare
@@ -132,15 +132,15 @@ the user what to publish.
 
 Use `"frame": { "mode": "responsive" }` when the app uses the iframe width.
 Use `"frame": { "mode": "contained", "width": 460, "height": 932 }` when the
-useful app surface is a fixed portrait/canvas shape and Appdrop should not treat
+useful app surface is a fixed portrait/canvas shape and appdrop should not treat
 the surrounding space as app content.
 Use `"frame": { "mode": "mobile", "width": 460, "height": 932 }` for
-phone-first apps that should be presented as a phone-sized Appdrop surface.
+phone-first apps that should be presented as a phone-sized appdrop surface.
 The app fills that surface edge to edge, so render the phone UI full-bleed —
 no letterboxing or device mockup of your own.
 
 If the app saves results, add an `outputs` array. The smallest declaration is
-`{ "type": "result", "schema": { "type": "object" } }`; Appdrop infers the
+`{ "type": "result", "schema": { "type": "object" } }`; appdrop infers the
 primitive family and adds `outputs:create` automatically. Add `kind`, `roles`,
 or `renderer` only when the defaults are not right. If the app reopens saved
 results from inventory, also add `"outputs:read"`.
@@ -163,25 +163,25 @@ Use the reusable primitive families `link`, `text`, `image`, `video`, `audio`,
 `file`, `collection`, `profile`, `action`, and `custom`. Semantic role defaults
 include `title`, `summary`, `primary_image`, `items`, and `open`.
 
-## Appdrop SDK (user data, saved results, or prompt-free snapshots)
+## appdrop SDK (user data, saved results, or prompt-free snapshots)
 
 - Load `$BASE/appdrop-sdk.js` at the document level (`next/script` for
   Next.js, a script tag in index.html for Vite/static), never from inside a
   React component.
-- `getUser()` and `saveOutput()` REJECT outside the Appdrop iframe, so gate on
+- `getUser()` and `saveOutput()` REJECT outside the appdrop iframe, so gate on
   `window.appdrop?.isEmbedded?.()` and degrade gracefully.
-- If the app renders its own internal iframe, also require Appdrop's frame
+- If the app renders its own internal iframe, also require appdrop's frame
   marker (`window.name.indexOf("appdrop-world:") === 0`) so a standalone editor
-  iframe is not mistaken for an Appdrop embed.
-- Prefer making the actual app document the direct Appdrop child. The SDK sends
+  iframe is not mistaken for an appdrop embed.
+- Prefer making the actual app document the direct appdrop child. The SDK sends
   requests to the immediate parent frame, so a wrapper page that renders the
-  real editor inside a second iframe will not reach Appdrop's bridge. If a
+  real editor inside a second iframe will not reach appdrop's bridge. If a
   framework route is only a wrapper, redirect or rewrite it to the app document
   while preserving `appdrop_output_id` and other query parameters. Only keep a
   nested iframe when it implements an explicit `postMessage` proxy.
-- To let Appdrop's universal **Capture** action snapshot the app without a
+- To let appdrop's universal **Capture** action snapshot the app without a
   browser screen-sharing prompt, register an app-owned snapshot provider after
-  the app's render surface is available. The callback receives Appdrop's output
+  the app's render surface is available. The callback receives appdrop's output
   limits and returns a PNG, JPEG, or WebP data URL. Return the unregister
   function from a React effect so stale render state is not retained:
 
@@ -210,13 +210,13 @@ useEffect(() => {
 ```
 
   `renderCurrentAppToCanvas` is app-owned; use the app's existing canvas/export
-  path or a DOM-to-image renderer appropriate to its framework. Appdrop
+  path or a DOM-to-image renderer appropriate to its framework. appdrop
   independently checks the data URL, encoded size, and decoded dimensions.
   Cross-origin images and nested YouTube/Instagram/etc. iframe pixels cannot be
   read by a DOM renderer: proxy permitted assets through the app's own origin
-  or render intentional placeholders. If no provider is registered, Appdrop
+  or render intentional placeholders. If no provider is registered, appdrop
   falls back to the browser's permission-based current-tab capture.
-- For generated images, use the shared Appdrop asset service instead of
+- For generated images, use the shared appdrop asset service instead of
   connecting the app directly to Supabase or another platform database:
 
 ```js
@@ -230,9 +230,9 @@ const preview = await window.appdrop.uploadOutputAsset({
   The returned `preview.url` is stable and can be passed to `saveOutput` as
   `preview_image_url`. The platform owns the storage bucket and associates the
   asset with the saved output; apps never receive storage credentials. Asset
-  uploads are only available inside the Appdrop iframe and should be skipped
+  uploads are only available inside the appdrop iframe and should be skipped
   when the app is running standalone.
-- For compatibility with older Appdrop host bridges that expose `saveOutput`
+- For compatibility with older appdrop host bridges that expose `saveOutput`
   before `uploadOutputAsset`, do not fail the save just because the helper is
   missing. Keep the inline preview temporarily under a conventional
   `data.image_data_url` field and call `saveOutput`; the platform promotes it
@@ -243,20 +243,20 @@ const preview = await window.appdrop.uploadOutputAsset({
   title, summary, preview_image_url, preview_asset_id, source_url,
   visibility: "private", data })`.
   Use `preview_image_url` for a share-card/thumbnail image of the actual result.
-  Use `source_url` for a reloadable result URL; Appdrop uses it to reopen the
+  Use `source_url` for a reloadable result URL; appdrop uses it to reopen the
   saved output inside the app frame from inventory and public output pages.
   When an asset upload was used, pass its `id` as `preview_asset_id`. Put the
   structured result state in `data`, including stable asset URLs or IDs rather
   than large base64 image strings. This workflow is app-agnostic: every app
   can register its own output type/schema while using the same asset service.
-- The neutral Appdrop **"Ready to share"** card, save notice, and chat composer
+- The neutral appdrop **"Ready to share"** card, save notice, and chat composer
   are host UI. Apps must not recreate that UI. A successful `saveOutput()`
   saves the result to the user's private **Creations** and opens the host's
   ready-to-share flow for any registered output type, including images, text,
   links, audio, video, and structured JSON.
 - The result stays private until the user explicitly taps **Send** in that
   host card. Do not silently change visibility to `public` or call a separate
-  chat API from the app. Appdrop promotes the output and places it in chat
+  chat API from the app. appdrop promotes the output and places it in chat
   after the user confirms Send.
 - Keep app-specific output types, but classify them with reusable primitives
   when the manifest supports it: `link`, `text`, `image`, `video`, `audio`,
@@ -294,7 +294,7 @@ fix the base option, rebuild, republish.
 ## Publish: fullstack Next.js
 
 Fullstack apps deploy to the creator's own Cloudflare account as a Worker
-(via OpenNext), then register the Worker URL with Appdrop. Read
+(via OpenNext), then register the Worker URL with appdrop. Read
 `fullstack.md` next to this file — or fetch `$BASE/skill/fullstack.md` —
 and follow it. Do not improvise this path from memory.
 
@@ -312,7 +312,7 @@ and follow it. Do not improvise this path from memory.
 ## What to tell the user
 
 - If the result JSON contains a `claimUrl`: lead with it —
-  `"Published to Appdrop: <claimUrl> (valid for 24 hours)"` — it is how the
+  `"Published to appdrop: <claimUrl> (valid for 24 hours)"` — it is how the
   user attaches the app to their account. Then list `claimExpiresAt`,
   `appdropUrl`, `hostedUrl`, and `slug`.
 - If there is no `claimUrl` (signed-in token): the app is already on their

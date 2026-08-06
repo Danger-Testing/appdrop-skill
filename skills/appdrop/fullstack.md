@@ -1,16 +1,16 @@
-# Appdrop: fullstack Next.js publish (Cloudflare Worker via OpenNext)
+# appdrop: fullstack Next.js publish (Cloudflare Worker via OpenNext)
 
 Part of the `appdrop` skill — read SKILL.md first for token setup, the
-static/fullstack decision, prep, and reporting. `$BASE` is the Appdrop base
+static/fullstack decision, prep, and reporting. `$BASE` is the appdrop base
 URL from SKILL.md. The Worker runs on the creator's own Cloudflare account;
-Appdrop only registers its URL.
+appdrop only registers its URL.
 
 ## Preflight
 
 - Run `npx wrangler whoami`. If not logged in, stop and ask the user to run
   `npx wrangler login` (their own Cloudflare account).
-- The creator may use their own Supabase for private app data, but Appdrop
-  profile/results data must go through the Appdrop SDK, never directly through
+- The creator may use their own Supabase for private app data, but appdrop
+  profile/results data must go through the appdrop SDK, never directly through
   the creator's Supabase.
 - Generated previews and other output media should use
   `window.appdrop.uploadOutputAsset(...)`; the app does not need a separate
@@ -57,12 +57,12 @@ export default defineCloudflareConfig();
   env names the backend code actually reads.
 - Smoke test the deployed Worker URL and every backend API route the app
   needs. HTML where JSON is expected = stop and fix hosting/env first.
-- If the app uses the Appdrop SDK, confirm the script tag is in the deployed
+- If the app uses the appdrop SDK, confirm the script tag is in the deployed
   HTML; if it saves results, verify the result flow calls
   `window.appdrop.saveOutput`. If you cannot complete a signed-in end-to-end
   saveOutput test, say exactly why and mark it not fully verified.
 
-## Register with Appdrop
+## Register with appdrop
 
 ```bash
 curl -s -X POST "$BASE/api/publish/hosted-app/register" \
@@ -106,7 +106,7 @@ Manifest permissions/outputs follow the same rules as `appdrop.json` in
 SKILL.md. Use `"frame": { "mode": "contained", "width": 460, "height": 932 }`
 when the useful app surface is a fixed portrait/canvas shape rather than a
 responsive page, or `"frame": { "mode": "mobile", "width": 460, "height": 932 }`
-for phone-first apps that should appear as a phone-sized Appdrop surface. The
+for phone-first apps that should appear as a phone-sized appdrop surface. The
 app fills that surface edge to edge, so render the phone UI full-bleed.
 The response `data.publish` contains the values to
 report (claimUrl when anonymous, appdropUrl, hostedUrl, slug) — report them per
