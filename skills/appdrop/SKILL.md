@@ -254,6 +254,13 @@ const preview = await window.appdrop.uploadOutputAsset({
   saves the result to the user's private **Creations** and opens the host's
   ready-to-share flow for any registered output type, including images, text,
   links, audio, video, and structured JSON.
+- If the embedded app immediately renders the saved result and needs the outer
+  appdrop address to become copyable without replacing the iframe, wait for
+  `saveOutput()` to resolve and then call
+  `await window.appdrop.setCurrentOutput({ id: result.output.id })`. This is a
+  separate navigation handshake by design: never call it before the save
+  promise resolves. It only makes the current saved result addressable; it
+  does not publish the private output or send it to chat.
 - The result stays private until the user explicitly taps **Send** in that
   host card. Do not silently change visibility to `public` or call a separate
   chat API from the app. appdrop promotes the output and places it in chat
